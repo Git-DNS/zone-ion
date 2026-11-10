@@ -14,7 +14,7 @@ window.ION_CONFIG = {
 
   // GitHub OAuth App client ID. The matching client secret lives only in the
   // Cloudflare Worker (see oauth-worker/README.md).
-  oauthClientId: "SETUP_GITHUB_OAUTH_CLIENT_ID",
+  oauthClientId: "Iv1.xxxxxxxxxxxx",
 
   // URL of the deployed OAuth Worker.
   oauthWorkerUrl: "https://ion-oauth.gitdns.workers.dev",
