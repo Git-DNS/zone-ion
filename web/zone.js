@@ -20,6 +20,21 @@ export const MAX_RECORDS = 64;
 export const MAX_VALUES = 16;
 export const ISSUE_MARKER = "<!-- gitdns-registration:v1 -->";
 
+// Addresses published in the GitHub Pages documentation. An apex domain needs
+// all of them; a subdomain uses a CNAME to <owner>.github.io instead.
+export const GITHUB_PAGES_A = [
+  "185.199.108.153",
+  "185.199.109.153",
+  "185.199.110.153",
+  "185.199.111.153",
+];
+export const GITHUB_PAGES_AAAA = [
+  "2606:50c0:8000::153",
+  "2606:50c0:8001::153",
+  "2606:50c0:8002::153",
+  "2606:50c0:8003::153",
+];
+
 export class ZoneError extends Error {
   constructor(message) {
     super(message);
@@ -301,4 +316,73 @@ export function relativeName(name) {
 export function secondLevel(name) {
   const labels = relativeName(name).split(".");
   return labels[labels.length - 1];
+}
+
+// ---------------------------------------------------------------------------
+// GitHub Pages shortcut
+//
+// The zone format only knows DNS record types, so this is an editor preset: it
+// turns one "owner/repository" value into the records that GitHub documents for
+// a custom Pages domain. The result is a normal A/AAAA or CNAME record, and the
+// bot, the Rust resolver and the TOML format stay unchanged.
+
+const GITHUB_LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/;
+const GITHUB_REPO = /^[A-Za-z0-9._-]{1,100}$/;
+
+// Parse "repository", "owner/repository" or a github.com URL. A bare repository
+// name belongs to the signed-in user, which is the only owner allowed here: the
+// domain and the repository must belong to the same GitHub account.
+export function parsePagesRepo(input, login) {
+  const user = String(login || "").trim();
+  if (!user) {
+    throw new ZoneError("Sign in with GitHub to use the GitHub Pages shortcut.");
+  }
+  let text = String(input || "").trim();
+  if (!text) {
+    throw new ZoneError("GitHub Pages: enter a repository, for example your-name/your-site.");
+  }
+  text = text
+    .replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, "")
+    .replace(/\.git$/i, "")
+    .replace(/^\/+|\/+$/g, "");
+  const parts = text.split("/").filter(Boolean);
+  if (parts.length === 1) {
+    parts.unshift(user);
+  }
+  if (parts.length !== 2) {
+    throw new ZoneError("GitHub Pages: use owner/repository, not a deeper path.");
+  }
+  const [owner, repo] = parts;
+  if (!GITHUB_LOGIN.test(owner)) {
+    throw new ZoneError(`GitHub Pages: "${owner}" is not a valid GitHub account name.`);
+  }
+  if (owner.toLowerCase() !== user.toLowerCase()) {
+    throw new ZoneError(
+      `The repository must belong to @${user}: the domain and the repository ` +
+        "use the same GitHub account.",
+    );
+  }
+  if (!GITHUB_REPO.test(repo) || repo === "." || repo === "..") {
+    throw new ZoneError(`GitHub Pages: "${repo}" is not a valid repository name.`);
+  }
+  return { owner: owner.toLowerCase(), repo };
+}
+
+// Build the records for one GitHub Pages site.
+//
+// * a second-level name (apex) gets the four A and four AAAA addresses;
+// * a subdomain gets a CNAME to <owner>.github.io.
+export function expandGithubPages(name, input, login) {
+  const { owner } = parsePagesRepo(input, login);
+  const relative = relativeName(name);
+  if (!relative) {
+    throw new ZoneError("GitHub Pages: enter the domain name first.");
+  }
+  if (relative.includes(".")) {
+    return [{ type: "CNAME", value: `${owner}.github.io.` }];
+  }
+  return [
+    { type: "A", values: [...GITHUB_PAGES_A] },
+    { type: "AAAA", values: [...GITHUB_PAGES_AAAA] },
+  ];
 }

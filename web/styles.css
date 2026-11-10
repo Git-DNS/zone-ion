@@ -511,7 +511,7 @@ main {
 
 .record-top {
   display: grid;
-  grid-template-columns: 118px minmax(0, 1fr) 34px;
+  grid-template-columns: 140px minmax(0, 1fr) 34px;
   gap: 8px;
 }
 
@@ -584,6 +584,13 @@ main {
 .record-extra label.is-visible {
   display: flex;
   flex-direction: column;
+}
+
+.record-pages-note {
+  margin: 9px 0 0;
+  color: var(--faint);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .record-extra label.record-ttl {
@@ -821,7 +828,7 @@ main {
   }
 
   .record-top {
-    grid-template-columns: 96px minmax(0, 1fr) 34px;
+    grid-template-columns: 118px minmax(0, 1fr) 34px;
   }
 
   .rule-grid {

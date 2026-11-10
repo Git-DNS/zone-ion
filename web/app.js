@@ -9,8 +9,10 @@ import {
   decodeBase64Url,
   dumpDomainToml,
   encodeBase64Url,
+  expandGithubPages,
   generateIdentity,
   identityFromSeed,
+  parsePagesRepo,
   relativeName,
   secondLevel,
   signDomain,
@@ -27,15 +29,20 @@ const STORAGE = {
   state: "ion.oauth.state",
 };
 const RECORD_TYPES = ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV", "CAA"];
+// The GitHub Pages entry is an editor preset, not a DNS type: it is expanded
+// into A/AAAA or CNAME records before signing.
+const PAGES_TYPE = "GITHUB_PAGES";
+const RECORD_TYPE_OPTIONS = [PAGES_TYPE, ...RECORD_TYPES];
 const TYPE_PLACEHOLDERS = {
-  A: "192.0.2.10",
-  AAAA: "2001:db8::1",
+  A: "192.0.2.10 (one address or several, comma separated)",
+  AAAA: "2001:db8::1 (one address or several, comma separated)",
   CNAME: "target.example.com.",
   TXT: "any text value",
   MX: "mail.example.com.",
   NS: "ns1.example.com.",
   SRV: "service.example.com.",
   CAA: "letsencrypt.org",
+  [PAGES_TYPE]: "owner/repository",
 };
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
 
@@ -605,10 +612,10 @@ function addRecordRow(record = {}) {
   const select = document.createElement("select");
   select.className = "record-type";
   select.setAttribute("aria-label", "Record type");
-  for (const type of RECORD_TYPES) {
+  for (const type of RECORD_TYPE_OPTIONS) {
     const option = document.createElement("option");
     option.value = type;
-    option.textContent = type;
+    option.textContent = type === PAGES_TYPE ? "GitHub Pages" : type;
     select.append(option);
   }
 
@@ -638,13 +645,25 @@ function addRecordRow(record = {}) {
     field("opt-tag", "Tag", "text", { placeholder: "issue" }),
   );
 
-  row.append(top, extra);
+  const note = document.createElement("p");
+  note.className = "record-pages-note";
+  note.hidden = true;
+
+  row.append(top, extra, note);
   editor.append(row);
 
-  select.value = RECORD_TYPES.includes(String(record.type).toUpperCase())
+  select.value = RECORD_TYPE_OPTIONS.includes(String(record.type).toUpperCase())
     ? String(record.type).toUpperCase()
     : "A";
-  value.value = record.value ?? (Array.isArray(record.values) ? record.values[0] : "") ?? "";
+  if (Array.isArray(record.values) && record.values.length) {
+    value.value =
+      String(record.type).toUpperCase() === "A" ||
+      String(record.type).toUpperCase() === "AAAA"
+        ? record.values.join(", ")
+        : record.values[0];
+  } else {
+    value.value = record.value ?? "";
+  }
   row.querySelector(".record-ttl input").value = record.ttl ?? "";
   row.querySelector(".opt-priority input").value = record.priority ?? "";
   row.querySelector(".opt-weight input").value = record.weight ?? "";
@@ -653,6 +672,7 @@ function addRecordRow(record = {}) {
   row.querySelector(".opt-tag input").value = record.tag ?? "";
 
   select.addEventListener("change", () => updateRowType(row));
+  value.addEventListener("input", () => updatePagesNote(row));
   remove.addEventListener("click", () => {
     if (editor.querySelectorAll(".record-row").length === 1) {
       value.value = "";
@@ -685,7 +705,10 @@ function updateRowType(row) {
   const select = row.querySelector(".record-type");
   const type = select.value;
   row.dataset.type = type;
-  row.querySelector(".record-value").placeholder = TYPE_PLACEHOLDERS[type] || "";
+  const value = row.querySelector(".record-value");
+  const pages = type === PAGES_TYPE;
+  value.placeholder = TYPE_PLACEHOLDERS[type] || "";
+  value.setAttribute("aria-label", pages ? "GitHub repository" : "Record value");
   const visible = {
     "opt-priority": type === "MX" || type === "SRV",
     "opt-weight": type === "SRV",
@@ -696,6 +719,37 @@ function updateRowType(row) {
   for (const [className, show] of Object.entries(visible)) {
     row.querySelector(`.${className}`).classList.toggle("is-visible", show);
   }
+  updatePagesNote(row);
+}
+
+// Explain what the GitHub Pages preset will sign. The domain name is used to
+// choose between the apex address set and a single CNAME.
+function updatePagesNote(row) {
+  const note = row.querySelector(".record-pages-note");
+  if (!note) {
+    return;
+  }
+  if (row.dataset.type !== PAGES_TYPE) {
+    note.hidden = true;
+    return;
+  }
+  note.hidden = false;
+  const name = inputName();
+  const fqdn = name ? `${name}.${zoneName()}` : "this name";
+  let owner = "";
+  try {
+    owner = parsePagesRepo(row.querySelector(".record-value").value, login()).owner;
+  } catch {
+    // Incomplete input: keep the generic text below.
+  }
+  const target = owner ? `${owner}.github.io` : "<owner>.github.io";
+  const created = name.includes(".")
+    ? `Creates one CNAME record for ${fqdn} pointing to ${target}.`
+    : `Creates four A and four AAAA records for ${fqdn}. ` +
+      `Register www.${name || "name"}.${zoneName()} the same way if you want the www host.`;
+  note.textContent =
+    `${created} The repository must belong to @${login() || "you"} and use this ` +
+    "domain in the GitHub Pages settings of the repository.";
 }
 
 function readNumber(row, selector, label, { required = false, min = 0, max = 65535 } = {}) {
@@ -719,11 +773,33 @@ function collectRecords() {
   for (const row of rows) {
     const type = row.querySelector(".record-type").value;
     const value = row.querySelector(".record-value").value.trim();
+    const ttl = readNumber(row, ".record-ttl input", "TTL", { min: 1, max: MAX_TTL });
+
+    if (type === PAGES_TYPE) {
+      if (!value) {
+        throw new ZoneError(
+          "GitHub Pages: enter the repository name, for example your-name/your-site.",
+        );
+      }
+      for (const generated of expandGithubPages(inputName(), value, login())) {
+        if (ttl !== undefined) {
+          generated.ttl = ttl;
+        }
+        records.push(generated);
+      }
+      continue;
+    }
+
     const record = { type };
-    if (value || type === "TXT") {
+    // A and AAAA accept several addresses in one row, separated by commas or
+    // spaces. This keeps a GitHub Pages apex set readable and compact.
+    const multi = type === "A" || type === "AAAA";
+    const parts = multi ? value.split(/[\s,]+/).filter(Boolean) : [];
+    if (parts.length > 1) {
+      record.values = parts;
+    } else if (value || type === "TXT") {
       record.value = value;
     }
-    const ttl = readNumber(row, ".record-ttl input", "TTL", { min: 1, max: MAX_TTL });
     if (ttl !== undefined) {
       record.ttl = ttl;
     }
@@ -831,6 +907,12 @@ function updateNameState() {
   } else {
     hint.textContent =
       "A second-level name counts toward the 48-hour limit. Subdomains do not.";
+  }
+
+  for (const row of document.querySelectorAll(
+    `#record-editor .record-row[data-type="${PAGES_TYPE}"]`,
+  )) {
+    updatePagesNote(row);
   }
 }
 
