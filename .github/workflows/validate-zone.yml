@@ -1,0 +1,63 @@
+# Validate zone files, the registration ledger and the tooling.
+name: validate-zone
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "zone.toml"
+      - "domains/**"
+      - "registry/**"
+      - "scripts/**"
+      - "tests/**"
+      - "web/zone.js"
+      - ".github/workflows/validate-zone.yml"
+  pull_request:
+    paths:
+      - "zone.toml"
+      - "domains/**"
+      - "registry/**"
+      - "scripts/**"
+      - "tests/**"
+      - "web/zone.js"
+      - ".github/workflows/validate-zone.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: scripts/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Verify signatures and ledger
+        run: python scripts/zone_admin.py verify-zone --root .
+
+      - name: Run Python tests
+        run: python -m unittest discover -s tests -p "test_*.py"
+
+      - name: Run JavaScript compatibility tests
+        run: node --test tests/canonical.test.mjs
+
+      - name: Reject committed private keys
+        shell: bash
+        run: |
+          keys="$(git ls-files | grep -E '(\.key$|(^|/)private/)' || true)"
+          if [ -n "$keys" ]; then
+            echo "::error::Private key files must never be committed."
+            echo "$keys"
+            exit 1
+          fi
