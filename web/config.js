@@ -7,7 +7,7 @@ window.ION_CONFIG = {
   zoneName: "ion",
 
   // GitHub repository that stores the zone, in owner/name form.
-  zoneRepo: "OWNER/zone-ion",
+  zoneRepo: "git-dns/zone-ion",
 
   // Branch that the registration bot commits to.
   branch: "main",
@@ -20,5 +20,5 @@ window.ION_CONFIG = {
   oauthWorkerUrl: "https://SETUP.example.workers.dev",
 
   // Repository with the GitDNS source code, used for the footer link.
-  sourceRepo: "OWNER/GitDNS",
+  sourceRepo: "git-dns/GitDNS",
 };
