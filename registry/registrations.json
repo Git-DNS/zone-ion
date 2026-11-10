@@ -1,5 +1,23 @@
 {
   "version": 1,
   "zone": "ion",
-  "registrations": []
+  "registrations": [
+    {
+      "domain": "firstevername",
+      "fqdn": "firstevername.ion",
+      "kind": "second_level",
+      "user": "Git-DNS",
+      "owner": "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18",
+      "created": "2026-11-10T19:15:44.222Z",
+      "registered_at": "2026-11-10T19:15:55Z",
+      "updated_at": "2026-11-10T19:15:55Z",
+      "issue": 1,
+      "records": [
+        {
+          "type": "TXT",
+          "value": "TEST TEST TESTING ION TEEESTING......"
+        }
+      ]
+    }
+  ]
 }
