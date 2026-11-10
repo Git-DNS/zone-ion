@@ -17,7 +17,7 @@ window.ION_CONFIG = {
   oauthClientId: "SETUP_GITHUB_OAUTH_CLIENT_ID",
 
   // URL of the deployed OAuth Worker.
-  oauthWorkerUrl: "https://SETUP.example.workers.dev",
+  oauthWorkerUrl: "https://ion-oauth.gitdns.workers.dev",
 
   // Repository with the GitDNS source code, used for the footer link.
   sourceRepo: "git-dns/GitDNS",
