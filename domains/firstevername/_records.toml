@@ -2,7 +2,7 @@ schema = 1
 name = "firstevername"
 owner = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
 created = "2026-11-10T19:15:44.222Z"
-updated = "2026-11-10T21:36:46.146Z"
+updated = "2026-11-10T21:38:00.845Z"
 
 [[records]]
 type = "CNAME"
@@ -10,5 +10,5 @@ value = "kovich33.github.io."
 
 [signature]
 key = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
-value = "Hjw_X18JVw9Jx0qOuAkouzyGhXdtgolUoq4aNFF_B9zImRws-riKwhOGckaR_fPt6qG5RmO_rCwkO8ULUmupBQ"
-signed_at = "2026-11-10T21:36:46.184Z"
+value = "NNcDVpt-5He5_rnVLFRoOLM5j_AOk_vFlhC7IF4OmWF2T2_De3jIKnckhh6FVmJ0jk6i6UJTrWrN3tX0SsYhAw"
+signed_at = "2026-11-10T21:38:00.886Z"

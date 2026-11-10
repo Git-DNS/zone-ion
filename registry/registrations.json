@@ -10,8 +10,8 @@
       "owner": "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18",
       "created": "2026-11-10T19:15:44.222Z",
       "registered_at": "2026-11-10T19:15:55Z",
-      "updated_at": "2026-11-10T21:36:56Z",
-      "issue": 6,
+      "updated_at": "2026-11-10T21:38:13Z",
+      "issue": 7,
       "records": [
         {
           "type": "CNAME",
