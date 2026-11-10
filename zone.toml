@@ -10,7 +10,7 @@ ns = ["ns1.ion", "ns2.ion"]
 [soa]
 mname = "ns1.ion"
 rname = "hostmaster.ion"
-serial = 2
+serial = 3
 refresh = 3600
 retry = 600
 expire = 604800

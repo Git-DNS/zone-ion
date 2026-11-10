@@ -10,12 +10,30 @@
       "owner": "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18",
       "created": "2026-11-10T19:15:44.222Z",
       "registered_at": "2026-11-10T19:15:55Z",
-      "updated_at": "2026-11-10T19:15:55Z",
-      "issue": 1,
+      "updated_at": "2026-11-10T20:07:55Z",
+      "issue": 2,
       "records": [
         {
           "type": "TXT",
           "value": "TEST TEST TESTING ION TEEESTING......"
+        },
+        {
+          "type": "A",
+          "values": [
+            "185.199.108.153",
+            "185.199.109.153",
+            "185.199.110.153",
+            "185.199.111.153"
+          ]
+        },
+        {
+          "type": "AAAA",
+          "values": [
+            "2606:50c0:8000::153",
+            "2606:50c0:8001::153",
+            "2606:50c0:8002::153",
+            "2606:50c0:8003::153"
+          ]
         }
       ]
     }

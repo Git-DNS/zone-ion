@@ -2,13 +2,21 @@ schema = 1
 name = "firstevername"
 owner = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
 created = "2026-11-10T19:15:44.222Z"
-updated = "2026-11-10T19:15:44.222Z"
+updated = "2026-11-10T20:07:44.634Z"
 
 [[records]]
 type = "TXT"
 value = "TEST TEST TESTING ION TEEESTING......"
 
+[[records]]
+type = "A"
+values = ["185.199.108.153", "185.199.109.153", "185.199.110.153", "185.199.111.153"]
+
+[[records]]
+type = "AAAA"
+values = ["2606:50c0:8000::153", "2606:50c0:8001::153", "2606:50c0:8002::153", "2606:50c0:8003::153"]
+
 [signature]
 key = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
-value = "KCmrzs83wJmwxdr16NSUfXltMz810Zb0Grbu0LrMCjLtSzqsvRpeTxAUXTe-3vf2KhnIo-vg9xdy6KyVHl6LDg"
-signed_at = "2026-11-10T19:15:44.231Z"
+value = "oEU_0YhRxQNJPRDCbeaW6YS0d94UP00RUQqQQNL314lAnzWR_w9bwS_omvup4X-CydYlZ5ZDe8O58X8-771lDA"
+signed_at = "2026-11-10T20:07:44.685Z"
