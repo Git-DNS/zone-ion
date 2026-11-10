@@ -1,0 +1,14 @@
+schema = 1
+name = "firstevername"
+owner = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
+created = "2026-11-10T19:15:44.222Z"
+updated = "2026-11-10T19:15:44.222Z"
+
+[[records]]
+type = "TXT"
+value = "TEST TEST TESTING ION TEEESTING......"
+
+[signature]
+key = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
+value = "KCmrzs83wJmwxdr16NSUfXltMz810Zb0Grbu0LrMCjLtSzqsvRpeTxAUXTe-3vf2KhnIo-vg9xdy6KyVHl6LDg"
+signed_at = "2026-11-10T19:15:44.231Z"
