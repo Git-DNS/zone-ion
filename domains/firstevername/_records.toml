@@ -2,45 +2,13 @@ schema = 1
 name = "firstevername"
 owner = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
 created = "2026-11-10T19:15:44.222Z"
-updated = "2026-11-10T21:26:02.664Z"
+updated = "2026-11-10T21:35:50.435Z"
 
 [[records]]
-type = "TXT"
-value = "TEST TEST TESTING ION TEEESTING......"
-
-[[records]]
-type = "A"
-value = "185.199.108.153"
-
-[[records]]
-type = "AAAA"
-value = "2606:50c0:8000::153"
-
-[[records]]
-type = "A"
-value = "185.199.109.153"
-
-[[records]]
-type = "A"
-value = "185.199.110.153"
-
-[[records]]
-type = "A"
-value = "185.199.111.153"
-
-[[records]]
-type = "AAAA"
-value = "2606:50c0:8001::153"
-
-[[records]]
-type = "AAAA"
-value = "2606:50c0:8002::153"
-
-[[records]]
-type = "AAAA"
-value = "2606:50c0:8003::153"
+type = "CNAME"
+value = "kovich33.github.io."
 
 [signature]
 key = "ed25519:UqtGIlhO_n1wZ3bGOmD8yzqKia3tA259zD0ZlAWUD18"
-value = "VvoN0hlAzqJxSBgQ5tKqDUb5tg107pVg38k5WH5qFtYGKoeZQgwXR4RAveR9K1s-hSFYjVYTS9HV2Hi2RXk9Bg"
-signed_at = "2026-11-10T21:26:02.705Z"
+value = "9VCFrtkzCfMG669_xOldUXuzsvNCHhcchj1xcccVlwvEpms4zN7ELy9Ugn7PIvKYEXPLOuQtWyK47sNWfQRRBA"
+signed_at = "2026-11-10T21:35:50.474Z"
