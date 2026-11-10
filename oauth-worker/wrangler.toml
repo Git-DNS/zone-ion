@@ -1,0 +1,14 @@
+name = "ion-oauth"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+# Non-secret settings. Update these before deploying.
+[vars]
+ALLOWED_ORIGINS = "https://git-dns.github.io"
+ALLOWED_REDIRECT_URIS = "https://git-dns.github.io/zone-ion/"
+
+# Store the OAuth App values as encrypted secrets:
+#   wrangler secret put GITHUB_CLIENT_ID
+#   wrangler secret put GITHUB_CLIENT_SECRET
+#
+# Do not put the client secret in this file.

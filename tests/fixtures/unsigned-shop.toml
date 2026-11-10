@@ -1,0 +1,21 @@
+schema = 1
+name = "shop"
+created = "2026-01-02T03:04:05Z"
+updated = "2026-01-02T03:04:05Z"
+
+[[records]]
+type = "A"
+value = "192.0.2.10"
+
+[[records]]
+type = "AAAA"
+value = "2001:db8::1"
+
+[[records]]
+type = "TXT"
+value = "hello world"
+
+[[records]]
+type = "MX"
+value = "mail.example.net."
+priority = 10

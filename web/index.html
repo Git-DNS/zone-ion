@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Register and manage .ion domains with your GitHub account. Records live in a public git repository."
+    />
+    <title>.ion Registry</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1020'/%3E%3Ccircle cx='32' cy='32' r='10' fill='%236ee7ff'/%3E%3Ccircle cx='32' cy='32' r='20' fill='none' stroke='%237c5cff' stroke-width='2'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="background-grid" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label=".ion home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>ion<span class="brand-dot">.</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a href="#register">Register</a>
+        <a href="#domains">My domains</a>
+        <a href="#rules">Rules</a>
+        <a id="repo-link" href="#" target="_blank" rel="noreferrer">GitHub</a>
+      </nav>
+      <div id="auth-slot" class="auth-slot">
+        <button id="login-button" class="button button-ghost" type="button">
+          Sign in with GitHub
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="eyebrow">A community root zone, stored in git</div>
+        <h1>Names for the <span class="accent">ion</span> age.</h1>
+        <p class="lede">
+          The <code>.ion</code> root zone is a public repository. Every domain is a
+          signed file, every change is a commit, and every owner signs in with GitHub.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#register">Register a domain</a>
+          <a class="button button-ghost" id="hero-repo" href="#" target="_blank" rel="noreferrer">
+            Read the zone
+          </a>
+        </div>
+        <dl class="stats" aria-label="Zone statistics">
+          <div>
+            <dt>Domains</dt>
+            <dd id="stat-domains">—</dd>
+          </div>
+          <div>
+            <dt>Second level</dt>
+            <dd id="stat-second">—</dd>
+          </div>
+          <div>
+            <dt>Subdomains</dt>
+            <dd id="stat-sub">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <div id="flash" class="flash" role="status" aria-live="polite" hidden></div>
+
+      <section id="signed-out" class="card sign-in-card" hidden>
+        <div>
+          <h2>One GitHub account, one identity.</h2>
+          <p>
+            Sign in to create a personal cabinet. Your GitHub account proves who may edit
+            a domain, and a local ed25519 key proves who owns it. The key never leaves
+            your browser.
+          </p>
+        </div>
+        <button id="login-button-2" class="button button-primary" type="button">
+          Sign in with GitHub
+        </button>
+      </section>
+
+      <section id="cabinet" hidden>
+        <div class="cabinet-head card">
+          <img id="user-avatar" class="avatar" alt="" width="56" height="56" />
+          <div class="cabinet-identity">
+            <div class="cabinet-name">
+              Signed in as <a id="user-link" href="#" target="_blank" rel="noreferrer"></a>
+            </div>
+            <div class="muted">
+              Owner key <code id="key-fingerprint">…</code>
+            </div>
+          </div>
+          <div class="cabinet-actions">
+            <button id="refresh-button" class="button button-ghost" type="button">
+              Refresh
+            </button>
+            <button id="logout-button" class="button button-quiet" type="button">
+              Sign out
+            </button>
+          </div>
+        </div>
+
+        <div id="cooldown-banner" class="notice" hidden></div>
+
+        <div class="workspace">
+          <section id="register" class="card">
+            <div class="card-heading">
+              <div>
+                <h2 id="form-title">Register a domain</h2>
+                <p id="form-subtitle" class="muted">
+                  Sign a domain file and open a registration issue. A bot validates it
+                  and commits the result.
+                </p>
+              </div>
+              <span id="kind-badge" class="badge">second level</span>
+            </div>
+
+            <form id="registration-form" novalidate>
+              <label class="field">
+                <span class="field-label">Name</span>
+                <div class="name-input">
+                  <input
+                    id="domain-name"
+                    name="domain"
+                    type="text"
+                    autocomplete="off"
+                    spellcheck="false"
+                    placeholder="yourname"
+                    required
+                  />
+                  <span class="name-suffix">.ion</span>
+                </div>
+                <span id="name-hint" class="field-hint">
+                  A second-level name counts toward the 48-hour limit. Subdomains do not.
+                </span>
+              </label>
+
+              <div class="records-heading">
+                <span class="field-label">Records</span>
+                <button id="add-record" class="button button-small button-ghost" type="button">
+                  + Add record
+                </button>
+              </div>
+              <div id="record-editor" class="record-editor"></div>
+
+              <details class="advanced">
+                <summary>How signing works</summary>
+                <p>
+                  Your browser builds a canonical JSON document, signs it with your local
+                  ed25519 key, and puts the signed TOML file into the issue. The private
+                  key is stored only in this browser profile.
+                </p>
+              </details>
+
+              <div class="form-actions">
+                <button id="submit-registration" class="button button-primary" type="submit">
+                  Sign and open registration issue
+                </button>
+                <button id="cancel-edit" class="button button-quiet" type="button" hidden>
+                  Cancel edit
+                </button>
+              </div>
+              <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <aside class="sidebar">
+            <section id="domains" class="card">
+              <div class="card-heading">
+                <h2>My domains</h2>
+                <span id="domain-count" class="count">0</span>
+              </div>
+              <p class="muted small">
+                Loaded from the public ledger. A new registration appears after the bot
+                commits it.
+              </p>
+              <div id="domain-list" class="domain-list"></div>
+            </section>
+
+            <section class="card">
+              <div class="card-heading">
+                <h2>Pending requests</h2>
+              </div>
+              <div id="pending-list" class="domain-list">
+                <p class="muted small">No pending registration issues.</p>
+              </div>
+            </section>
+
+            <section class="card key-card">
+              <div class="card-heading">
+                <h2>Your identity</h2>
+              </div>
+              <p class="muted small">
+                Keep an export of this key. Without it you cannot sign updates, even if
+                you still control the GitHub account.
+              </p>
+              <code id="public-key" class="key-text"></code>
+              <div class="key-actions">
+                <button id="export-key" class="button button-small button-ghost" type="button">
+                  Export key
+                </button>
+                <button id="import-key" class="button button-small button-ghost" type="button">
+                  Import key
+                </button>
+                <input id="import-file" type="file" accept="application/json,.json" hidden />
+              </div>
+            </section>
+          </aside>
+        </div>
+      </section>
+
+      <section id="rules" class="rules">
+        <h2>Rules that keep the zone fair</h2>
+        <div class="rule-grid">
+          <article class="card">
+            <span class="rule-number">01</span>
+            <h3>GitHub sign-in</h3>
+            <p>
+              A GitHub account is required. The issue author is the account recorded in
+              the ledger; a signed file alone is not enough.
+            </p>
+          </article>
+          <article class="card">
+            <span class="rule-number">02</span>
+            <h3>One name per 48 hours</h3>
+            <p>
+              Each account may register one second-level domain every 48 hours.
+              Subdomains of a domain you own are unlimited.
+            </p>
+          </article>
+          <article class="card">
+            <span class="rule-number">03</span>
+            <h3>Ownership is a key</h3>
+            <p>
+              Updates and subdomains must be signed by the same ed25519 key. The zone
+              bot verifies the signature before every commit.
+            </p>
+          </article>
+          <article class="card">
+            <span class="rule-number">04</span>
+            <h3>Everything is public</h3>
+            <p>
+              Zone files, the registration ledger and the bot source are in one public
+              repository. History is the audit log.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <strong>.ion</strong> is a GitDNS root zone. Records resolve through any GitDNS
+        resolver.
+      </div>
+      <div class="footer-links">
+        <a id="footer-repo" href="#" target="_blank" rel="noreferrer">Repository</a>
+        <a href="#rules">Rules</a>
+        <span>No cookies. No tracking.</span>
+      </div>
+    </footer>
+
+    <script src="config.js"></script>
+    <script src="vendor/tweetnacl.min.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

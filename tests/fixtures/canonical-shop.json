@@ -1,0 +1,38 @@
+{
+  "zone": "ion",
+  "seed": "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA",
+  "public": "ed25519:ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+  "payload": "{\"schema\":1,\"zone\":\"ion\",\"name\":\"shop\",\"owner\":\"ed25519:ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ\",\"created\":\"2026-01-02T03:04:05Z\",\"updated\":\"2026-01-02T03:04:05Z\",\"records\":[{\"type\":\"A\",\"value\":\"192.0.2.10\"},{\"type\":\"AAAA\",\"value\":\"2001:db8::1\"},{\"type\":\"MX\",\"value\":\"mail.example.net.\",\"priority\":10},{\"type\":\"TXT\",\"value\":\"hello world\"}]}",
+  "signature": "QlptNjlRhaJkv8qSp56v8CgQ01UB-wZaQ2EYp9lG4DPd3utRkQpJW377zf_hxgcBWr7NK-XiOF6bbC9FnLxRAA",
+  "domain": {
+    "schema": 1,
+    "name": "shop",
+    "created": "2026-01-02T03:04:05Z",
+    "updated": "2026-01-02T03:04:05Z",
+    "records": [
+      {
+        "type": "A",
+        "value": "192.0.2.10"
+      },
+      {
+        "type": "AAAA",
+        "value": "2001:db8::1"
+      },
+      {
+        "type": "TXT",
+        "value": "hello world"
+      },
+      {
+        "type": "MX",
+        "value": "mail.example.net.",
+        "priority": 10
+      }
+    ],
+    "owner": "ed25519:ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+    "signature": {
+      "key": "ed25519:ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+      "value": "QlptNjlRhaJkv8qSp56v8CgQ01UB-wZaQ2EYp9lG4DPd3utRkQpJW377zf_hxgcBWr7NK-XiOF6bbC9FnLxRAA",
+      "signed_at": "2026-11-10T15:41:36.1556416Z"
+    }
+  }
+}

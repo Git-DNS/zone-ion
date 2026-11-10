@@ -1,0 +1,2 @@
+# Python dependencies for scripts/zone_admin.py and the tests.
+cryptography>=42,<52
