@@ -20,20 +20,10 @@ export const MAX_RECORDS = 64;
 export const MAX_VALUES = 16;
 export const ISSUE_MARKER = "<!-- gitdns-registration:v1 -->";
 
-// Addresses published in the GitHub Pages documentation. An apex domain needs
-// all of them; a subdomain uses a CNAME to <owner>.github.io instead.
-export const GITHUB_PAGES_A = [
-  "185.199.108.153",
-  "185.199.109.153",
-  "185.199.110.153",
-  "185.199.111.153",
-];
-export const GITHUB_PAGES_AAAA = [
-  "2606:50c0:8000::153",
-  "2606:50c0:8001::153",
-  "2606:50c0:8002::153",
-  "2606:50c0:8003::153",
-];
+// Addresses published in the GitHub Pages documentation. They are kept here
+// for reference only: a .ion name cannot use them over HTTPS because GitHub
+// cannot obtain a public certificate for a private TLD. The editor preset
+// below creates a REDIRECT to the github.io address instead.
 
 export class ZoneError extends Error {
   constructor(message) {
@@ -253,6 +243,12 @@ export function validateRecords(records) {
   if (hasCname && records.length > 1) {
     errors.push("CNAME cannot be combined with other records.");
   }
+  const hasRedirect = records.some(
+    (record) => String(record.type || "").toUpperCase() === "REDIRECT",
+  );
+  if (hasRedirect && records.length > 1) {
+    errors.push("REDIRECT cannot be combined with other records for the same name.");
+  }
   for (const record of records) {
     const type = String(record.type || "").toUpperCase();
     const values = record.values || (record.value !== undefined ? [record.value] : []);
@@ -305,8 +301,38 @@ export function validateRecords(records) {
         }
       }
     }
+    if (type === "REDIRECT") {
+      if (values.length !== 1) {
+        errors.push("REDIRECT: exactly one URL is required.");
+      } else {
+        try {
+          validateRedirectUrl(values[0]);
+        } catch (err) {
+          errors.push(err.message);
+        }
+      }
+    }
   }
   return errors;
+}
+
+// Absolute web address used by a REDIRECT record. The listener sends a 301 to
+// exactly this URL, so a missing scheme or a typo would stop the redirect.
+export function validateRedirectUrl(input) {
+  const value = String(input || "").trim();
+  if (!value) {
+    throw new ZoneError("REDIRECT: enter a URL.");
+  }
+  if (value.length > 2048) {
+    throw new ZoneError("REDIRECT: the URL is longer than 2048 characters.");
+  }
+  if (!/^[\x21-\x7e]+$/.test(value)) {
+    throw new ZoneError("REDIRECT: use ASCII characters and percent-encode the rest.");
+  }
+  if (!/^https?:\/\/[^\s/?#]+(?:[/?#]\S*)?$/i.test(value)) {
+    throw new ZoneError("REDIRECT: use an http:// or https:// address with a host name.");
+  }
+  return value;
 }
 
 export function relativeName(name) {
@@ -321,10 +347,13 @@ export function secondLevel(name) {
 // ---------------------------------------------------------------------------
 // GitHub Pages shortcut
 //
-// The zone format only knows DNS record types, so this is an editor preset: it
-// turns one "owner/repository" value into the records that GitHub documents for
-// a custom Pages domain. The result is a normal A/AAAA or CNAME record, and the
-// bot, the Rust resolver and the TOML format stay unchanged.
+// GitHub Pages cannot serve a .ion name over HTTPS: Let's Encrypt and GitHub
+// cannot validate a name that only resolves inside GitDNS, so the custom domain
+// shows 503 Service Unavailable. The shortcut therefore creates a REDIRECT
+// record: GitDNS answers the browser and sends it to the working github.io
+// address with an HTTP 301. Do not also set the .ion domain as the custom
+// domain in the repository settings, or GitHub will redirect back to .ion and
+// create a loop.
 
 const GITHUB_LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/;
 const GITHUB_REPO = /^[A-Za-z0-9._-]{1,100}$/;
@@ -370,19 +399,18 @@ export function parsePagesRepo(input, login) {
 
 // Build the records for one GitHub Pages site.
 //
-// * a second-level name (apex) gets the four A and four AAAA addresses;
-// * a subdomain gets a CNAME to <owner>.github.io.
+// A redirect works for both a second-level name and a subdomain. A user site
+// (the repository is named <owner>.github.io) lives at the root of github.io;
+// a project site lives under its repository name.
 export function expandGithubPages(name, input, login) {
-  const { owner } = parsePagesRepo(input, login);
+  const { owner, repo } = parsePagesRepo(input, login);
   const relative = relativeName(name);
   if (!relative) {
     throw new ZoneError("GitHub Pages: enter the domain name first.");
   }
-  if (relative.includes(".")) {
-    return [{ type: "CNAME", value: `${owner}.github.io.` }];
-  }
-  return [
-    { type: "A", values: [...GITHUB_PAGES_A] },
-    { type: "AAAA", values: [...GITHUB_PAGES_AAAA] },
-  ];
+  const target =
+    repo.toLowerCase() === `${owner}.github.io`
+      ? `https://${owner}.github.io/`
+      : `https://${owner}.github.io/${repo}/`;
+  return [{ type: "REDIRECT", value: target }];
 }

@@ -12,7 +12,6 @@ import {
   expandGithubPages,
   generateIdentity,
   identityFromSeed,
-  parsePagesRepo,
   relativeName,
   secondLevel,
   signDomain,
@@ -28,9 +27,9 @@ const STORAGE = {
   token: "ion.token.v1",
   state: "ion.oauth.state",
 };
-const RECORD_TYPES = ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV", "CAA"];
+const RECORD_TYPES = ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV", "CAA", "REDIRECT"];
 // The GitHub Pages entry is an editor preset, not a DNS type: it is expanded
-// into A/AAAA or CNAME records before signing.
+// into a REDIRECT record before signing.
 const PAGES_TYPE = "GITHUB_PAGES";
 const RECORD_TYPE_OPTIONS = [PAGES_TYPE, ...RECORD_TYPES];
 const TYPE_PLACEHOLDERS = {
@@ -42,6 +41,7 @@ const TYPE_PLACEHOLDERS = {
   NS: "ns1.example.com.",
   SRV: "service.example.com.",
   CAA: "letsencrypt.org",
+  REDIRECT: "https://example.com/ (absolute http:// or https:// URL)",
   [PAGES_TYPE]: "owner/repository",
 };
 const COOLDOWN_MS = 48 * 60 * 60 * 1000;
@@ -722,8 +722,7 @@ function updateRowType(row) {
   updatePagesNote(row);
 }
 
-// Explain what the GitHub Pages preset will sign. The domain name is used to
-// choose between the apex address set and a single CNAME.
+// Explain what the GitHub Pages preset will sign.
 function updatePagesNote(row) {
   const note = row.querySelector(".record-pages-note");
   if (!note) {
@@ -736,20 +735,17 @@ function updatePagesNote(row) {
   note.hidden = false;
   const name = inputName();
   const fqdn = name ? `${name}.${zoneName()}` : "this name";
-  let owner = "";
+  let target = "https://<owner>.github.io/<repository>/";
   try {
-    owner = parsePagesRepo(row.querySelector(".record-value").value, login()).owner;
+    target = expandGithubPages(name, row.querySelector(".record-value").value, login())[0].value;
   } catch {
-    // Incomplete input: keep the generic text below.
+    // Incomplete input: keep the generic address below.
   }
-  const target = owner ? `${owner}.github.io` : "<owner>.github.io";
-  const created = name.includes(".")
-    ? `Creates one CNAME record for ${fqdn} pointing to ${target}.`
-    : `Creates four A and four AAAA records for ${fqdn}. ` +
-      `Register www.${name || "name"}.${zoneName()} the same way if you want the www host.`;
   note.textContent =
-    `${created} The repository must belong to @${login() || "you"} and use this ` +
-    "domain in the GitHub Pages settings of the repository.";
+    `Creates one REDIRECT record for ${fqdn} to ${target}. ` +
+    `The repository must belong to @${login() || "you"}. Keep the custom domain ` +
+    "field empty in the repository's GitHub Pages settings: GitHub cannot issue " +
+    "an HTTPS certificate for .ion, and setting it would create a redirect loop.";
 }
 
 function readNumber(row, selector, label, { required = false, min = 0, max = 65535 } = {}) {
