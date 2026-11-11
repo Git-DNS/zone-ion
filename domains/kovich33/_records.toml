@@ -2,17 +2,13 @@ schema = 1
 name = "kovich33"
 owner = "ed25519:oOpKyMKwMW3AruGCRVyzMKRrcHXKCCdAd7QbIZD7MZQ"
 created = "2026-11-10T20:27:01.476Z"
-updated = "2026-11-10T20:27:01.477Z"
+updated = "2026-11-11T14:59:36.713Z"
 
 [[records]]
-type = "A"
-values = ["185.199.108.153", "185.199.109.153", "185.199.110.153", "185.199.111.153"]
-
-[[records]]
-type = "AAAA"
-values = ["2606:50c0:8000::153", "2606:50c0:8001::153", "2606:50c0:8002::153", "2606:50c0:8003::153"]
+type = "REDIRECT"
+value = "https://kovich33.github.io/KoVich/"
 
 [signature]
 key = "ed25519:oOpKyMKwMW3AruGCRVyzMKRrcHXKCCdAd7QbIZD7MZQ"
-value = "hYrr1JINBC34tXkOi_d_t4tYnSwaPyioXLe9eqz61ehKzfdr_Fe3Dj7Evp0p4H4Kdq5-Z6ttFBv5bTE-M8xLCw"
-signed_at = "2026-11-10T20:27:01.486Z"
+value = "DS0bSjnauu9m-FBshkEuh_UnqVuLvMueZ3XfTG8eTvUhP5W6ZQX4gFm9oKF3MP9WfD_DH14QWUvXU9nrKPDKAA"
+signed_at = "2026-11-11T14:59:36.750Z"
