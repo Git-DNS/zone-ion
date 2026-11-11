@@ -4,13 +4,13 @@ description = "The .ion is a test zone for GitDNS."
 default_ttl = 300
 negative_ttl = 60
 policy = "open"
-allowed_types = ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV", "CAA", "PTR"]
+allowed_types = ["A", "AAAA", "CNAME", "TXT", "MX", "NS", "SRV", "CAA", "PTR", "REDIRECT"]
 ns = ["ns1.ion", "ns2.ion"]
 
 [soa]
 mname = "ns1.ion"
 rname = "hostmaster.ion"
-serial = 8
+serial = 1
 refresh = 3600
 retry = 600
 expire = 604800

@@ -167,8 +167,8 @@ python scripts/zone_admin.py verify-zone --root .
 # Python tests (validator, cooldown, ownership, idempotency)
 python -m unittest discover -s tests -p "test_*.py"
 
-# JavaScript tests (canonical JSON and signatures must match Rust)
-node --test tests/canonical.test.mjs
+# JavaScript tests (canonical JSON, signatures, GitHub Pages preset)
+node --test tests/canonical.test.mjs tests/pages.test.mjs
 ```
 
 To try the static site without GitHub:
@@ -232,9 +232,64 @@ value = "base64url-signature"
 signed_at = "2026-05-01T12:00:00Z"
 ```
 
-Supported types: `A`, `AAAA`, `CNAME`, `TXT`, `MX`, `NS`, `SRV`, `CAA`, `PTR`.
-`CNAME` cannot be combined with other records. TTL is limited to 7 days. See
-`docs/ZONE_FORMAT.md` in the GitDNS source for the full format.
+Supported types: `A`, `AAAA`, `CNAME`, `TXT`, `MX`, `NS`, `SRV`, `CAA`, `PTR`,
+`REDIRECT`. `CNAME` and `REDIRECT` cannot be combined with other records for the
+same name. TTL is limited to 7 days. See `docs/ZONE_FORMAT.md` in the GitDNS
+source for the full format.
+
+### Redirect records
+
+`REDIRECT` is not a DNS record type on the wire. A name with a `REDIRECT`
+record resolves to the address of the built-in redirect listener, and the
+listener answers a normal HTTP request with `301 Moved Permanently` and the
+stored URL:
+
+```toml
+[[records]]
+type = "REDIRECT"
+value = "https://example.com/"
+```
+
+The target must be an absolute `http://` or `https://` URL. A redirect cannot
+share a name with other records, and wildcard names are not supported.
+
+Turn the listener on in **Settings → Redirects** in the desktop app. The default
+is `0.0.0.0:80`; binding a low port may need administrator (Windows) or root
+(Linux/macOS) rights. If you change the port, open `http://name:port/`: a browser
+does not try other ports. The **answer address** is what DNS clients receive, so
+it must be reachable from the browser: `127.0.0.1` works only when the browser
+and GitDNS run on the same computer, and the LAN address is needed for other
+devices. The listener is HTTP only; see the next section for why.
+
+### GitHub Pages shortcut
+
+The record editor has a **GitHub Pages** entry. It is an editor preset, not a
+DNS type: it creates one `REDIRECT` record to
+`https://<owner>.github.io/<repository>/`, or to
+`https://<owner>.github.io/` when the repository is `<owner>.github.io`.
+
+GitHub Pages cannot serve a `.ion` name over HTTPS. GitHub and Let's Encrypt
+cannot validate a name that only resolves inside GitDNS, so a custom domain in
+the repository settings ends with **503 Service Unavailable** once HTTPS is
+used. Plain HTTP can still load the site, but browsers and GitHub prefer HTTPS.
+
+The redirect avoids the problem: `http://shop.ion/` is answered by GitDNS with
+a 301 to the github.io address, where GitHub's own certificate is valid. Keep
+the custom domain field **empty** in **Settings → Pages** of the repository. If
+it is set to the `.ion` name, GitHub redirects the github.io address back to
+`.ion` and the browser loops.
+
+Enter a repository name (`my-site`), `owner/repository`, or a github.com URL.
+The repository must belong to the same GitHub account as the domain. Add the
+shortcut for every host you want, including `www.<name>`.
+
+A/AAAA records still accept several addresses in one entry:
+
+```toml
+[[records]]
+type = "A"
+values = ["185.199.108.153", "185.199.109.153", "185.199.110.153", "185.199.111.153"]
+```
 
 ### Canonical payload
 
