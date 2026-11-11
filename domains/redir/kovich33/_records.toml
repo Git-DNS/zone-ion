@@ -1,0 +1,14 @@
+schema = 1
+name = "redir.kovich33"
+owner = "ed25519:oOpKyMKwMW3AruGCRVyzMKRrcHXKCCdAd7QbIZD7MZQ"
+created = "2026-11-11T15:02:23.765Z"
+updated = "2026-11-11T15:02:23.765Z"
+
+[[records]]
+type = "REDIRECT"
+value = "https://kovich33.ru/"
+
+[signature]
+key = "ed25519:oOpKyMKwMW3AruGCRVyzMKRrcHXKCCdAd7QbIZD7MZQ"
+value = "rqaDaDx9Vs1FGFArk8L_RFctXL7nvvZXywf9Ag91kMVdBLq6Ugkc67csu4Z4BhIW9SmcnkGFs0gIwyBe1v97CA"
+signed_at = "2026-11-11T15:02:23.803Z"

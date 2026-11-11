@@ -35,6 +35,23 @@
           "value": "https://kovich33.github.io/KoVich/"
         }
       ]
+    },
+    {
+      "domain": "redir.kovich33",
+      "fqdn": "redir.kovich33.ion",
+      "kind": "subdomain",
+      "user": "KoVich33",
+      "owner": "ed25519:oOpKyMKwMW3AruGCRVyzMKRrcHXKCCdAd7QbIZD7MZQ",
+      "created": "2026-11-11T15:02:23.765Z",
+      "registered_at": "2026-11-11T15:02:35Z",
+      "updated_at": "2026-11-11T15:02:35Z",
+      "issue": 9,
+      "records": [
+        {
+          "type": "REDIRECT",
+          "value": "https://kovich33.ru/"
+        }
+      ]
     }
   ]
 }
